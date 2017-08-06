@@ -1,0 +1,40 @@
+name: coverish
+version: '0.1.0.0'
+category: Network
+author: Patrick Brisbin
+maintainer: pbrisbin@gmail.com
+copyright: 2017 pbrisbin@gmail.com
+license: BSD3
+github: pbrisbin/coverish
+extra-source-files:
+- README.md
+library:
+  source-dirs: src
+  exposed-modules:
+  - Data.String.Strip
+  dependencies:
+  - base >=4.7 && <5
+executables:
+  coverish:
+    main: Main.hs
+    source-dirs: app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - base
+    - coverish
+tests:
+  coverish-test:
+    main: Spec.hs
+    source-dirs: test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - base
+    - coverish
+    - hspec
+    - QuickCheck
