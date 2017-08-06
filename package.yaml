@@ -11,9 +11,11 @@ extra-source-files:
 library:
   source-dirs: src
   exposed-modules:
-  - Data.String.Strip
+  - Coverish
   dependencies:
   - base >=4.7 && <5
+  - parsec
+  - text
 executables:
   coverish:
     main: Main.hs
@@ -25,6 +27,7 @@ executables:
     dependencies:
     - base
     - coverish
+    - text
 tests:
   coverish-test:
     main: Spec.hs
