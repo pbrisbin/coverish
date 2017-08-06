@@ -14,7 +14,7 @@ main :: IO ()
 main = do
     input <- T.getContents
 
-    case parseCoverage "_coverage" "<stdin>" input of
+    case parseCoverage "<stdin>" input of
         Right cs -> mapM_ printSourceFile =<< sourceFiles cs
         Left err -> do
             hPutStrLn stderr err

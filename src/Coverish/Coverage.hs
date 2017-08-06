@@ -21,20 +21,15 @@ data Coverage = Coverage
     deriving (Eq, Show)
 
 -- | Parse the given input to an array of @'Coverage'@
-parseCoverage
-    :: String -- ^ Prefix for coverage lines to parse (e.g. @_coverage@)
-    -> String -- ^ SourceName (file name or @"<stdin>"@)
-    -> Text   -- ^ Input stream
-    -> Either String [Coverage]
-parseCoverage prefix name input = first show $ parse (parser prefix) name input
+parseCoverage :: String -> Text -> Either String [Coverage]
+parseCoverage name input = first show $ parse parser name input
 
-parser :: String -> Parser [Coverage]
-parser prefix = coverageParser prefix `sepEndByIgnoring` restOfLine
+parser :: Parser [Coverage]
+parser = coverageParser `sepEndByIgnoring` restOfLine
 
--- | @{PREFIX}{DELIM}{PATH}{DELIM}{LINE}{DELIM}
-coverageParser :: String -> Parser Coverage
-coverageParser prefix = do
-    delim <- string prefix *> anyChar
+coverageParser :: Parser Coverage
+coverageParser = do
+    delim <- prefixParser *> anyChar
 
     let delimP = char delim
 
@@ -42,7 +37,12 @@ coverageParser prefix = do
         <$> manyTill anyChar delimP
         <*> (read <$> manyTill digit delimP)
 
--- | Apply parser @p@ separated by parser @end@, bug ignore any parse failures
+prefixParser :: Parser ()
+prefixParser = do
+    void $ many1 $ char '_'
+    void $ string "coverage"
+
+-- | Apply parser @p@ separated by parser @end@, but ignore any parse failures
 sepEndByIgnoring :: Parser a -> Parser b -> Parser [a]
 sepEndByIgnoring p end = catMaybes <$> optionMaybe (try p) `sepEndBy` end
 

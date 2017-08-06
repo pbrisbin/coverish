@@ -8,6 +8,8 @@ module Coverish.SourceFile
 import Control.Monad (foldM)
 import Data.Char (isSpace)
 import Data.Text (Text)
+import System.FilePath ((</>), splitFileName)
+import System.Directory (getCurrentDirectory, withCurrentDirectory)
 
 import qualified Control.Exception as E
 import qualified Data.Map as M
@@ -19,7 +21,7 @@ import Coverish.Coverage
 data LineCoverage
     = Null        -- ^ Not a source line
     | Missed      -- ^ Uncovered source line
-    | Covered Int -- ^ Covered some non-zero amount of times
+    | Covered Int -- ^ Covered some amount of times
     deriving (Eq, Show)
 
 data SourceFile = SourceFile
@@ -38,14 +40,15 @@ addCoverage m c = do
 
     return $ case esf of
         Left _ -> m -- Leave as-is
-        Right sf -> M.insertWith combineSourceFiles (cPath c) sf m
+        Right sf -> M.insertWith combineSourceFiles (sfPath sf) sf m
 
 buildSourceFile :: Coverage -> IO SourceFile
 buildSourceFile c = do
-    contents <- T.readFile $ cPath c
+    path <- canonicalizePath $ cPath c
+    contents <- T.readFile $ path
 
     return $ SourceFile
-        { sfPath = cPath c
+        { sfPath = path
         , sfContents = contents
         , sfCoverage = buildLineCoverage c $ T.lines contents
         }
@@ -56,11 +59,15 @@ buildLineCoverage c = zipWith go [1..]
     go :: Int -> Text -> LineCoverage
     go idx ln
         | idx == cLineNumber c = Covered 1
-        | isCode ln = Missed
-        | otherwise = Null
+        | isBlank ln = Null
+        | isComment ln = Null
+        | otherwise = Missed
 
-    isCode :: Text -> Bool
-    isCode = ("#" `T.isPrefixOf`) . T.dropWhile isSpace
+    isBlank :: Text -> Bool
+    isBlank = T.null . T.dropWhile isSpace
+
+    isComment :: Text -> Bool
+    isComment = ("#" `T.isPrefixOf`) . T.dropWhile isSpace
 
 combineSourceFiles :: SourceFile -> SourceFile -> SourceFile
 combineSourceFiles sf1 sf2 = sf1
@@ -71,7 +78,14 @@ combineLineCoverage = zipWith go
   where
     go :: LineCoverage -> LineCoverage -> LineCoverage
     go (Covered x) (Covered y) = Covered $ x + y
-    go x _ = x -- all over cases can just prefer right
+    go c@(Covered _) _ = c
+    go _ c@(Covered _) = c
+    go x _ = x
+
+canonicalizePath :: FilePath -> IO FilePath
+canonicalizePath fp = do
+    let (dir, name) = splitFileName fp
+    withCurrentDirectory dir $ (</> name) <$> getCurrentDirectory
 
 try :: IO a -> IO (Either E.IOException a)
 try = E.try
