@@ -21,8 +21,10 @@ main = do
             exitFailure
 
 printSourceFile :: SourceFile -> IO ()
-printSourceFile sf = mapM_ T.putStrLn $ zipWith go (sfCoverage sf) $ T.lines $ sfContents sf
+printSourceFile sf = do
+    putStrLn $ "\ESC[36m" <> sfPath sf <> "\ESC[0m"
+    mapM_ T.putStrLn $ zipWith go (sfCoverage sf) $ T.lines $ sfContents sf
   where
-    go (Covered _) ln = "G " <> ln
-    go Missed      ln = "R " <> ln
-    go Null        ln = "  " <> ln
+    go (Covered _) ln = "\ESC[32m" <> ln <> "\ESC[0m"
+    go Missed      ln = "\ESC[31m" <> ln <> "\ESC[0m"
+    go Null        ln = ln
