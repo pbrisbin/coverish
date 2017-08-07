@@ -2,6 +2,7 @@ module Coverish.Trace
     ( Trace(..)
     , Execution(..)
     , parseTrace
+    , filterTrace
     ) where
 
 import Control.Monad (void)
@@ -27,6 +28,9 @@ newtype Trace = Trace [Execution] deriving (Eq, Show)
 --
 parseTrace :: String -> Text -> Either String Trace
 parseTrace name = bimap show Trace . parse executions name
+
+filterTrace :: (Execution -> Bool) -> Trace -> Trace
+filterTrace f (Trace es) = Trace $ filter f es
 
 executions :: Parser [Execution]
 executions = execution `sepEndByIgnoring` restOfLine
