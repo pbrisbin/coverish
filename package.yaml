@@ -14,16 +14,19 @@ library:
   - Coverish
   other-modules:
   - Coverish.Format
+  - Coverish.Options
   - Coverish.SourceFile
   - Coverish.Summary
   - Coverish.Trace
   - Coverish.Trace.Lookup
   dependencies:
   - base >=4.7 && <5
+  - Glob
   - aeson
   - containers
   - directory
   - filepath
+  - optparse-applicative
   - parsec
   - text
 executables:
@@ -37,7 +40,6 @@ executables:
     dependencies:
     - base
     - coverish
-    - Glob
     - text
 tests:
   coverish-test:
