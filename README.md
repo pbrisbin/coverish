@@ -27,7 +27,6 @@ Test coverage for shell scripts.
    fi
    ```
 
-
 1. Run your tests
 
    Are you not testing your shell scripts? I recommend [cram](https://bitheap.org/cram/).
@@ -41,10 +40,6 @@ Test coverage for shell scripts.
    ```console
    coverish < /tmp/coverage.txt | less -R
    ```
-
-   *Note: more output formats (e.g. HTML) are coming soon. For now, we just
-   output the source file(s) with red/green highlighting, which I'm then paging
-   through `less` in the example above.*
 
 ## Usage (Dash)
 
