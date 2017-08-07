@@ -44,3 +44,7 @@ tests:
     - coverish
     - hspec
     - QuickCheck
+    - directory
+    - filepath
+    - temporary
+    - text
