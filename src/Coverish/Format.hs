@@ -48,7 +48,10 @@ format FText sfs = T.pack $ unlines
 format FRichText _ = error "Rich text format not implemented yet"
 
 showPercent :: Summary -> String
-showPercent = show . sPercent
+showPercent = show . percent . sPercent
+  where
+    percent :: Rational -> Double
+    percent = (*100) . fromRational
 
 toReport :: [SourceFile] -> Report
 toReport = Report . map summarizedSourceFile
