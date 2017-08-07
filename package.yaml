@@ -12,6 +12,12 @@ library:
   source-dirs: src
   exposed-modules:
   - Coverish
+  other-modules:
+  - Coverish.Format
+  - Coverish.SourceFile
+  - Coverish.Summary
+  - Coverish.Trace
+  - Coverish.Trace.Lookup
   dependencies:
   - base >=4.7 && <5
   - aeson
