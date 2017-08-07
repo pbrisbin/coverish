@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 module Coverish.Format
     ( Format(..)
     , format
@@ -45,13 +46,49 @@ format FText sfs = T.pack $ unlines
     tsum = summarize report
     report = toReport sfs
 
-format FRichText _ = error "Rich text format not implemented yet"
+format FRichText sfs = T.unlines $ concatMap formatFile ssfs
+  where
+    formatFile ssf = showSourceHeader ssf <> showSource (sSourceFile ssf)
+    ssfs = rSourceFiles report
+    report = toReport sfs
+
+showSourceHeader :: SummarizedSourceFile -> [Text]
+showSourceHeader SummarizedSourceFile{..} =
+    [ "+-" <> T.replicate hdrWidth "-" <> "-+"
+    , "| " <> header                   <> " |"
+    , "+-" <> T.replicate hdrWidth "-" <> "-+"
+    ]
+  where
+    header = path <> " (" <> esc "36" <> perc <> reset <> ")"
+    hdrWidth = T.length header - 9 -- subtract invisible escapes
+
+    path = T.pack $ sfPath sSourceFile
+    perc = T.pack $ showPercent sTotals
+
+showSource :: SourceFile -> [Text]
+showSource SourceFile{..} = zipWith3 go ([1..] :: [Int]) sfLines sfCoverage
+  where
+    go i ln cov = idx i <> " " <> esc (escCode cov) <> ln <> reset
+
+    escCode (Covered _) = "32"
+    escCode Missed = "31"
+    escCode Null = "37"
+
+    idx i = T.justifyRight lnWidth ' ' $ T.pack $ show i
+    sfLines = T.lines sfContents
+    lnWidth = length $ show $ length sfLines
 
 showPercent :: Summary -> String
-showPercent = show . percent . sPercent
+showPercent = (<> "%") . show . percent . sPercent
   where
     percent :: Rational -> Double
     percent = (*100) . fromRational
+
+esc :: Text -> Text
+esc c = "\ESC[" <> c <> "m"
+
+reset :: Text
+reset = esc "0"
 
 toReport :: [SourceFile] -> Report
 toReport = Report . map summarizedSourceFile

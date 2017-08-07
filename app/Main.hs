@@ -25,7 +25,7 @@ main = do
             { oInputName = "<stdin>"
             , oReadInput = T.getContents
             , oWriteOutput = T.putStrLn
-            , oFormat = FText -- FJSON
+            , oFormat = FRichText -- FText -- FJSON
             , oExclude = ["**/*"]
             , oInclude = ["**/downgrade"]
             }
