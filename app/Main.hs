@@ -22,7 +22,7 @@ main = do
             { oInputName = "<stdin>"
             , oReadInput = T.getContents
             , oWriteOutput = T.putStrLn
-            , oFormat = FJSON
+            , oFormat = FText -- FJSON
             }
 
     etrace <- parseTrace (oInputName opts) <$> oReadInput opts

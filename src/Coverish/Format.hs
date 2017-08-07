@@ -5,14 +5,17 @@ module Coverish.Format
     ) where
 
 import Data.Aeson (ToJSON(..), (.=), encode, object)
+import Data.Monoid ((<>))
 import Data.Text (Text)
 import Data.Text.Lazy (toStrict)
 import Data.Text.Lazy.Encoding (decodeUtf8)
 
+import qualified Data.Text as T
+
 import Coverish.SourceFile
 import Coverish.Summary
 
-newtype Report = Report [SummarizedSourceFile]
+newtype Report = Report { rSourceFiles :: [SummarizedSourceFile] }
 
 instance Summarized Report where
     summarize (Report sfs) = mconcat $ map sTotals sfs
@@ -29,11 +32,23 @@ data Format
     | FRichText
 
 format :: Format -> [SourceFile] -> Text
-format FJSON = toStrict . decodeUtf8 . encode . toReport
+format FJSON sfs = toStrict $ decodeUtf8 $ encode $ toReport sfs
+format FText sfs = T.pack $ unlines
+    $ map formatFile ssfs <> ["total: " <> showPercent tsum]
+  where
+    formatFile ssf = concat
+        [ sfPath $ sSourceFile ssf, ": "
+        , showPercent $ sTotals ssf
+        ]
 
-format FText = error "Text format not implemented yet"
+    ssfs = rSourceFiles report
+    tsum = summarize report
+    report = toReport sfs
 
-format FRichText = error "Rich text format not implemented yet"
+format FRichText _ = error "Rich text format not implemented yet"
+
+showPercent :: Summary -> String
+showPercent = show . sPercent
 
 toReport :: [SourceFile] -> Report
 toReport = Report . map summarizedSourceFile

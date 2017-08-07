@@ -1,6 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Coverish.Summary
-    ( Summary
+    ( Summary(..)
+    , sTotal
+    , sPercent
+    , sStrength
     , Summarized(..)
     , SummarizedSourceFile(..)
     , summarizedSourceFile
