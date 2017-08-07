@@ -1,39 +1,43 @@
-module Coverish.Coverage
-    ( Coverage(..)
-    , parseCoverage
+module Coverish.Trace
+    ( Trace(..)
+    , Execution(..)
+    , parseTrace
     ) where
 
 import Control.Monad (void)
-import Data.Bifunctor (first)
-import Data.Text (Text)
+import Data.Bifunctor (bimap)
 import Data.Maybe (catMaybes)
+import Data.Text (Text)
 import Text.Parsec
 import Text.Parsec.Text
 
--- | Input definition
-data Coverage = Coverage
-    { cPath :: FilePath
-    -- ^ Parsed exactly as-is, which means it may be empty, relative or
-    -- absolute, and the file may or may not exist. Further validation of that
-    -- is done at a later stage.
-    , cLineNumber :: Int
+data Execution = Execution
+    { exPath :: FilePath
+    , exLine :: Int
     }
     deriving (Eq, Show)
 
--- | Parse the given input to an array of @'Coverage'@
-parseCoverage :: String -> Text -> Either String [Coverage]
-parseCoverage name input = first show $ parse parser name input
+newtype Trace = Trace [Execution] deriving (Eq, Show)
 
-parser :: Parser [Coverage]
-parser = coverageParser `sepEndByIgnoring` restOfLine
+-- | Parse the output of @set -x@ faithfully
+--
+-- Requires the trace be formatted in the following way:
+--
+-- > _coverage${DELIM}${PATH}${DELIM}${LINE}
+--
+parseTrace :: String -> Text -> Either String Trace
+parseTrace name = bimap show Trace . parse executions name
 
-coverageParser :: Parser Coverage
-coverageParser = do
+executions :: Parser [Execution]
+executions = execution `sepEndByIgnoring` restOfLine
+
+execution :: Parser Execution
+execution = do
     delim <- prefixParser *> anyChar
 
     let delimP = char delim
 
-    Coverage
+    Execution
         <$> manyTill anyChar delimP
         <*> (read <$> manyTill digit delimP)
 

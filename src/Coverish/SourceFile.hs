@@ -5,18 +5,16 @@ module Coverish.SourceFile
     , sourceFiles
     ) where
 
-import Control.Monad (foldM)
+import Control.Monad (forM)
 import Data.Char (isSpace)
 import Data.Text (Text)
-import System.FilePath ((</>), splitFileName)
-import System.Directory (getCurrentDirectory, withCurrentDirectory)
 
 import qualified Control.Exception as E
-import qualified Data.Map as M
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 
-import Coverish.Coverage
+import Coverish.Trace
+import Coverish.Trace.Lookup
 
 data LineCoverage
     = Null        -- ^ Not a source line
@@ -31,61 +29,32 @@ data SourceFile = SourceFile
     }
     deriving (Eq, Show)
 
-sourceFiles :: [Coverage] -> IO [SourceFile]
-sourceFiles = (M.elems <$>) . foldM addCoverage M.empty
+sourceFiles :: Trace -> IO [SourceFile]
+sourceFiles t = do
+    tl <- buildTraceLookup t
 
-addCoverage :: M.Map FilePath SourceFile -> Coverage -> IO (M.Map FilePath SourceFile)
-addCoverage m c = do
-    esf <- try $ buildSourceFile c
+    forM (tracePaths tl) $ \path -> do
+        contents <- either (const "") id <$> safeRead path
 
-    return $ case esf of
-        Left _ -> m -- Leave as-is
-        Right sf -> M.insertWith combineSourceFiles (sfPath sf) sf m
+        let coverage = zipWith (lookupCoverage tl path) (T.lines contents) [1..]
 
-buildSourceFile :: Coverage -> IO SourceFile
-buildSourceFile c = do
-    path <- canonicalizePath $ cPath c
-    contents <- T.readFile $ path
+        return $ SourceFile
+            { sfPath = path
+            , sfContents = contents
+            , sfCoverage = coverage
+            }
 
-    return $ SourceFile
-        { sfPath = path
-        , sfContents = contents
-        , sfCoverage = buildLineCoverage c $ T.lines contents
-        }
-
-buildLineCoverage :: Coverage -> [Text] -> [LineCoverage]
-buildLineCoverage c = zipWith go [1..]
+lookupCoverage :: TraceLookup -> FilePath -> Text -> Int -> LineCoverage
+lookupCoverage tl path line lineNo =
+    case executedInTrace path lineNo tl of
+        Just hits -> Covered hits
+        Nothing -> if isBlank line || isComment line then Null else Missed
   where
-    go :: Int -> Text -> LineCoverage
-    go idx ln
-        | idx == cLineNumber c = Covered 1
-        | isBlank ln = Null
-        | isComment ln = Null
-        | otherwise = Missed
-
     isBlank :: Text -> Bool
     isBlank = T.null . T.dropWhile isSpace
 
     isComment :: Text -> Bool
     isComment = ("#" `T.isPrefixOf`) . T.dropWhile isSpace
 
-combineSourceFiles :: SourceFile -> SourceFile -> SourceFile
-combineSourceFiles sf1 sf2 = sf1
-    { sfCoverage = combineLineCoverage (sfCoverage sf1) (sfCoverage sf2) }
-
-combineLineCoverage :: [LineCoverage] -> [LineCoverage] -> [LineCoverage]
-combineLineCoverage = zipWith go
-  where
-    go :: LineCoverage -> LineCoverage -> LineCoverage
-    go (Covered x) (Covered y) = Covered $ x + y
-    go c@(Covered _) _ = c
-    go _ c@(Covered _) = c
-    go x _ = x
-
-canonicalizePath :: FilePath -> IO FilePath
-canonicalizePath fp = do
-    let (dir, name) = splitFileName fp
-    withCurrentDirectory dir $ (</> name) <$> getCurrentDirectory
-
-try :: IO a -> IO (Either E.IOException a)
-try = E.try
+safeRead :: FilePath -> IO (Either E.IOException Text)
+safeRead = E.try . T.readFile
