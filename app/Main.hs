@@ -1,30 +1,37 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import Data.Monoid ((<>))
+import Data.Text (Text)
 import System.Exit (exitFailure)
 import System.IO (hPutStrLn, stderr)
 
-import qualified Data.Text as T
 import qualified Data.Text.IO as T
 
 import Coverish
 
+data Options = Options
+    { oInputName :: String
+    , oReadInput :: IO Text
+    , oWriteOutput :: Text -> IO ()
+    , oFormat :: Format
+    }
+
 main :: IO ()
 main = do
-    input <- T.getContents
+    let opts = Options
+            { oInputName = "<stdin>"
+            , oReadInput = T.getContents
+            , oWriteOutput = T.putStrLn
+            , oFormat = FJSON
+            }
 
-    case parseTrace "<stdin>" input of
-        Right t -> mapM_ printSourceFile =<< sourceFiles t
+    etrace <- parseTrace (oInputName opts) <$> oReadInput opts
+
+    case etrace of
+        Right t -> do
+            sfs <- sourceFiles t
+            oWriteOutput opts $ format (oFormat opts) sfs
+
         Left err -> do
             hPutStrLn stderr err
             exitFailure
-
-printSourceFile :: SourceFile -> IO ()
-printSourceFile sf = do
-    putStrLn $ "\ESC[36m" <> sfPath sf <> "\ESC[0m"
-    mapM_ T.putStrLn $ zipWith go (sfCoverage sf) $ T.lines $ sfContents sf
-  where
-    go (Covered _) ln = "\ESC[32m" <> ln <> "\ESC[0m"
-    go Missed      ln = "\ESC[31m" <> ln <> "\ESC[0m"
-    go Null        ln = ln

@@ -7,8 +7,13 @@ module Coverish.Trace.Lookup
 
 import Control.Monad ((<=<))
 import Data.Either (rights)
-import System.Directory (getCurrentDirectory, withCurrentDirectory)
+import System.Directory
+    ( doesFileExist
+    , getCurrentDirectory
+    , withCurrentDirectory
+    )
 import System.FilePath ((</>), splitFileName)
+import System.IO.Error (userError)
 
 import qualified Control.Exception as E
 import qualified Data.Map as M
@@ -46,5 +51,8 @@ executionToPair ex = E.try $ do
     let (dir, name) = splitFileName $ exPath ex
 
     path <- withCurrentDirectory dir $ (</> name) <$> getCurrentDirectory
+    exists <- doesFileExist path
 
-    return (path, M.fromList [(exLine ex, 1)])
+    if exists
+        then return (path, M.fromList [(exLine ex, 1)])
+        else E.throwIO $ userError $ "Invalid path " ++ exPath ex
