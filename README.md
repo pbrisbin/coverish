@@ -2,6 +2,8 @@
 
 Test coverage for shell scripts.
 
+![](./files/rich.png)
+
 ## Installation
 
 1. Install [`stack`](https://docs.haskellstack.org/en/stable/README/)
