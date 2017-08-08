@@ -10,18 +10,31 @@ import Data.Text (Text)
 import Text.Parsec
 import Text.Parsec.Text
 
+-- | Test if a /line/ of shell code is expected to be executed
+--
+-- When a line does not appear in a @'Trace'@, if it is executable, it should be
+-- marked @'Missed'@, otherwise it's @'Null'@ and doesn't impact coverage stats.
+--
 executable :: Text -> Bool
 executable = isLeft . parseUnexecutable
 
+-- | Exported for testing & debugging
 parseUnexecutable :: Text -> Either String ()
 parseUnexecutable = first show . parse unexecutable ""
 
 unexecutable :: Parser ()
 unexecutable = choice
-    [ try $ blank
-    , try $ comment
-    , try $ functionBegin
-    , try $ functionEnd
+    [ try blank
+    , try comment
+    , try functionBegin
+    , try $ isolated "}"
+    , try $ isolated "do"
+    , try $ isolated "done"
+    , try $ isolated "esac"
+    , try $ isolated "then"
+    , try $ isolated "else"
+    , try $ isolated "elif"
+    , try $ isolated "fi"
     ]
 
 blank :: Parser ()
@@ -37,5 +50,5 @@ functionBegin =
     spaces *> char '(' *> spaces *> char ')' *>
     spaces *> char '{' *> spaces *> eof
 
-functionEnd :: Parser ()
-functionEnd = spaces *> char '}' *> spaces *> eof
+isolated :: String -> Parser ()
+isolated s = spaces *> string s *> spaces *> eof
