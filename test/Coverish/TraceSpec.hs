@@ -19,22 +19,9 @@ spec = describe "parseTrace" $ do
                 ]
 
         input `shouldParseTo` Trace
-            [ Execution "/foo/bar" 1
-            , Execution "/baz/bat" 2
-            , Execution "/foo/bar" 2
-            ]
-
-    it "ignores lines without the defined prefix" $ do
-        let input = buildTrace
-                [ "_coverage:/foo/bar:1:whatever"
-                , "Hey there"
-                , "_coverage:/foo/bar:2:more content\t yeah"
-                , "Again"
-                ]
-
-        input `shouldParseTo` Trace
-            [ Execution "/foo/bar" 1
-            , Execution "/foo/bar" 2
+            [ Execution "/foo/bar" 1 1
+            , Execution "/baz/bat" 2 1
+            , Execution "/foo/bar" 2 1
             ]
 
     it "parses with any number of leading underscore" $ do
@@ -44,8 +31,8 @@ spec = describe "parseTrace" $ do
                 ]
 
         input `shouldParseTo` Trace
-            [ Execution "/foo/bar" 1
-            , Execution "/foo/bar" 2
+            [ Execution "/foo/bar" 1 1
+            , Execution "/foo/bar" 2 1
             ]
 
     it "parses with any delimiter" $ do
@@ -55,14 +42,23 @@ spec = describe "parseTrace" $ do
                 ]
 
         input `shouldParseTo` Trace
-            [ Execution "/foo/bar" 1
-            , Execution "/foo/bar" 2
+            [ Execution "/foo/bar" 1 1
+            , Execution "/foo/bar" 2 1
             ]
 
     it "still parses with empty paths" $ do
         let input = buildTrace ["_coverage::1:whatever"]
 
-        input `shouldParseTo` Trace [Execution "" 1]
+        input `shouldParseTo` Trace [Execution "" 1 1]
+
+    it "parses multi-line commands correctly" $ do
+        let input = buildTrace
+                [ "_coverage:/foo/bar:4:  sed '"
+                , "    /pattern/!d"
+                , "    s//replacement/'"
+                ]
+
+        input `shouldParseTo` Trace [Execution "/foo/bar" 4 3]
 
 shouldParseTo :: Text -> Trace -> Expectation
 x `shouldParseTo` y = parseTrace "test input" x `shouldBe` Right y

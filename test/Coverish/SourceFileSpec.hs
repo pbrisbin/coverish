@@ -20,13 +20,13 @@ spec = describe "sourceFiles" $ do
 
     (dir, sfs) <- runIO $ withFileTree paths $ \d -> do
         (,) <$> pure d <*> sourceFiles (Trace
-            [ Execution (d </> "foo/bar") 2
-            , Execution (d </> "foo/bar") 4
-            , Execution (d </> "foo/baz") 2
-            , Execution (d </> "foo/baz") 4
-            , Execution (d </> "foo/baz") 2
-            , Execution (d </> "foo/baz") 4
-            , Execution (d </> "foo/baz") 3
+            [ Execution (d </> "foo/bar") 2 1
+            , Execution (d </> "foo/bar") 4 1
+            , Execution (d </> "foo/baz") 2 1
+            , Execution (d </> "foo/baz") 4 1
+            , Execution (d </> "foo/baz") 2 1
+            , Execution (d </> "foo/baz") 4 1
+            , Execution (d </> "foo/baz") 3 1
             ])
 
     it "builds a list of SourceFiles from a Trace" $ do

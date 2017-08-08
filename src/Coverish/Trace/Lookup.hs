@@ -1,3 +1,4 @@
+{-# LANGUAGE TupleSections #-}
 module Coverish.Trace.Lookup
     ( TraceLookup
     , buildTraceLookup
@@ -54,5 +55,11 @@ executionToPair ex = E.try $ do
     exists <- doesFileExist path
 
     if exists
-        then return (path, M.fromList [(exLine ex, 1)])
+        then return (path, M.fromList $ executionLines ex)
         else E.throwIO $ userError $ "Invalid path " ++ exPath ex
+
+executionLines :: Execution -> [(Int, Int)]
+executionLines ex =
+    let endLine = exLine ex
+        beginLine = endLine - (exSize ex - 1)
+    in map (, 1) [beginLine .. endLine]

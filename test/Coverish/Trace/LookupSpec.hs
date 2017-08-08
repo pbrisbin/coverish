@@ -16,12 +16,13 @@ spec = do
     d <- runIO getCurrentDirectory
     tl <- runIO $ buildTraceLookup $ Trace
             -- Use some of our own spec files, since we know they'll exist
-            [ Execution "test/Coverish/Trace/LookupSpec.hs" 1
-            , Execution "test/Coverish/TraceSpec.hs" 1
-            , Execution "/non/existent" 10
-            , Execution "test/Coverish/Trace/LookupSpec.hs" 2
-            , Execution "test/Coverish/Trace/LookupSpec.hs" 1
-            , Execution "test/Coverish/Trace/LookupSpec.hs" 1
+            [ Execution "test/Coverish/Trace/LookupSpec.hs" 1 1
+            , Execution "test/Coverish/TraceSpec.hs" 1 1
+            , Execution "/non/existent" 10 1
+            , Execution "test/Coverish/Trace/LookupSpec.hs" 2 1
+            , Execution "test/Coverish/Trace/LookupSpec.hs" 1 1
+            , Execution "test/Coverish/Trace/LookupSpec.hs" 1 1
+            , Execution "test/Coverish/Trace/LookupSpec.hs" 5 2 -- multi-line
             ]
 
     describe "tracePaths" $ do
@@ -36,6 +37,12 @@ spec = do
             let absolute = d </> "test/Coverish/Trace/LookupSpec.hs"
             executedInTrace absolute 1 tl `shouldBe` Just 3
             executedInTrace absolute 2 tl `shouldBe` Just 1
+
+            -- multi-line
+            executedInTrace absolute 3 tl `shouldBe` Nothing
+            executedInTrace absolute 4 tl `shouldBe` Just 1
+            executedInTrace absolute 5 tl `shouldBe` Just 1
+            executedInTrace absolute 6 tl `shouldBe` Nothing
 
         it "returns Nothing for unexecuted lines" $ do
             executedInTrace "foo" 1 tl `shouldBe` Nothing

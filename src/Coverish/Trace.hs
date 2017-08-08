@@ -7,7 +7,6 @@ module Coverish.Trace
 
 import Control.Monad (void)
 import Data.Bifunctor (bimap)
-import Data.Maybe (catMaybes)
 import Data.Text (Text)
 import Text.Parsec
 import Text.Parsec.Text
@@ -15,6 +14,7 @@ import Text.Parsec.Text
 data Execution = Execution
     { exPath :: FilePath
     , exLine :: Int
+    , exSize :: Int
     }
     deriving (Eq, Show)
 
@@ -33,7 +33,7 @@ filterTrace :: (Execution -> Bool) -> Trace -> Trace
 filterTrace f (Trace es) = Trace $ filter f es
 
 executions :: Parser [Execution]
-executions = execution `sepEndByIgnoring` restOfLine
+executions = many execution <* eof
 
 execution :: Parser Execution
 execution = do
@@ -41,19 +41,21 @@ execution = do
 
     let delimP = char delim
 
-    Execution
-        <$> manyTill anyChar delimP
-        <*> (read <$> manyTill digit delimP)
+    path <- manyTill anyChar delimP
+    line <- read <$> manyTill digit delimP
+
+    -- ignore rest of line
+    void $ manyTill anyChar endOfLine
+
+    -- size is 1 + any number of continuation lines
+    size <- (+1) . length . lines <$> manyTill anyToken nextExecution
+
+    return $ Execution path line size
+
+  where
+    nextExecution = lookAhead $ try prefixParser <|> eof
 
 prefixParser :: Parser ()
 prefixParser = do
     void $ many1 $ char '_'
     void $ string "coverage"
-
--- | Apply parser @p@ separated by parser @end@, but ignore any parse failures
-sepEndByIgnoring :: Parser a -> Parser b -> Parser [a]
-sepEndByIgnoring p end = catMaybes <$> optionMaybe (try p) `sepEndBy` end
-
--- | Ignore anything up to, then parse, an @'endOfLine'@
-restOfLine :: Parser ()
-restOfLine = void $ manyTill anyChar endOfLine
