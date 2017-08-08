@@ -37,6 +37,12 @@ spec = describe "executable" $ do
         "} " `shouldNotSatisfy` executable
         " }" `shouldNotSatisfy` executable
 
+    it "returns False for case patterns" $ do
+        " foo*)" `shouldNotSatisfy` executable
+        "( foo* )" `shouldNotSatisfy` executable
+        "( foo*|*bar )" `shouldNotSatisfy` executable
+        "bat) " `shouldNotSatisfy` executable
+
     it "returns True for other constructions" $ do
         "echo 1" `shouldSatisfy` executable
         "echo 1 # a comment" `shouldSatisfy` executable
