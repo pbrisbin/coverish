@@ -16,6 +16,7 @@ library:
   - Coverish.Format
   - Coverish.Options
   - Coverish.SourceFile
+  - Coverish.SourceFile.LineParser
   - Coverish.Summary
   - Coverish.Trace
   - Coverish.Trace.Lookup

@@ -7,13 +7,13 @@ module Coverish.SourceFile
     ) where
 
 import Control.Monad (forM)
-import Data.Char (isSpace)
 import Data.Text (Text)
 
 import qualified Data.Aeson as A
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 
+import Coverish.SourceFile.LineParser
 import Coverish.Trace
 import Coverish.Trace.Lookup
 
@@ -57,13 +57,4 @@ lookupCoverage tl path line lineNo =
     maybe (unexecuted line) Covered $ executedInTrace path lineNo tl
 
 unexecuted :: Text -> LineCoverage
-unexecuted line
-    | isBlank line = Null
-    | isComment line = Null
-    | otherwise = Missed
-
-isBlank :: Text -> Bool
-isBlank = T.null . T.dropWhile isSpace
-
-isComment :: Text -> Bool
-isComment = ("#" `T.isPrefixOf`) . T.dropWhile isSpace
+unexecuted line = if executable line then Missed else Null
