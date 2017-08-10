@@ -13,6 +13,7 @@ import Data.Text.Lazy.Encoding (decodeUtf8)
 
 import qualified Data.Text as T
 
+import Coverish.Format.Color
 import Coverish.SourceFile
 import Coverish.Summary
 
@@ -55,26 +56,26 @@ format FRichText sfs = T.unlines $ concatMap formatFile ssfs
 showSourceHeader :: SummarizedSourceFile -> [Text]
 showSourceHeader SummarizedSourceFile{..} =
     [ "+-" <> T.replicate hdrWidth "-" <> "-+"
-    , "| " <> header                   <> " |"
+    , "| " <> render header            <> " |"
     , "+-" <> T.replicate hdrWidth "-" <> "-+"
     ]
   where
-    header = path <> " (" <> esc "36" <> perc <> reset <> ")"
-    hdrWidth = T.length header - 9 -- subtract invisible escapes
+    header = path <> " (" <> FG Cyan <> perc <> Reset <> ")"
+    hdrWidth = visibleLength header
 
-    path = T.pack $ sfPath sSourceFile
-    perc = T.pack $ showPercent sTotals
+    path = Plain $ T.pack $ sfPath sSourceFile
+    perc = Plain $ T.pack $ showPercent sTotals
 
 showSource :: SourceFile -> [Text]
 showSource SourceFile{..} = zipWith3 go ([1..] :: [Int]) sfLines sfCoverage
   where
-    go i ln cov = idx i <> " " <> esc (escCode cov) <> ln <> reset
+    go i ln cov = render $ idx i <> " " <> FG (escCode cov) <> Plain ln <> Reset
 
-    escCode (Covered _) = "32"
-    escCode Missed = "31"
-    escCode Null = "37"
+    escCode (Covered _) = Green
+    escCode Missed = Red
+    escCode Null = LightGray
 
-    idx i = T.justifyRight lnWidth ' ' $ T.pack $ show i
+    idx i = Plain $ T.justifyRight lnWidth ' ' $ T.pack $ show i
     sfLines = T.lines sfContents
     lnWidth = length $ show $ length sfLines
 
@@ -83,12 +84,6 @@ showPercent = (<> "%") . show . percent . sPercent
   where
     percent :: Rational -> Double
     percent = (*100) . fromRational
-
-esc :: Text -> Text
-esc c = "\ESC[" <> c <> "m"
-
-reset :: Text
-reset = esc "0"
 
 toReport :: [SourceFile] -> Report
 toReport = Report . map summarizedSourceFile
