@@ -47,6 +47,8 @@ jobs:
               stack --local-bin-path "$PWD"/out install \
                 --ghc-options "-optl-static -fPIC -optc-Os"
 
+              ./out/coverish --version
+
               for exe in coverish{,-eval,-exec}; do
                 aws s3 cp --acl public-read "out/$exe" \
                   "s3://source.pbrisbin.com/coverish/${exe}-head-linux-x86_64"
