@@ -46,7 +46,7 @@ parseOptions = do
                 , oCoverishOptions = before
                 }
 
-        _ -> error "usage: coverish-exec [[COVERISH OPTIONS] --] CMD [OPTION, ...]"
+        _ -> error "usage: coverish-exec [[COVERISH OPTIONS] --] CMD [OPTIONS]"
 
 callProcessWithEnv :: [(String, String)] -> FilePath -> [String] -> IO ()
 callProcessWithEnv e cmd args = do
