@@ -20,6 +20,7 @@ library:
   - Coverish.Summary
   - Coverish.Trace
   - Coverish.Trace.Lookup
+  - Paths_coverish
   dependencies:
   - base >=4.7 && <5
   - Glob
@@ -27,6 +28,7 @@ library:
   - containers
   - directory
   - filepath
+  - gitrev
   - optparse-applicative
   - parsec
   - text

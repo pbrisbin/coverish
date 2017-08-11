@@ -1,12 +1,17 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TemplateHaskell #-}
 module Coverish.Options
     ( Options(..)
     , parseOptions
+    , versionString
     ) where
 
 import Data.Semigroup ((<>))
 import Data.Text (Text)
+import Data.Version (showVersion)
+import Development.GitRev (gitHash)
 import Options.Applicative
+import Paths_coverish (version)
 import System.FilePath.Glob (Pattern, compile, match)
 
 import qualified Data.Text.IO as T
@@ -20,6 +25,7 @@ data Options = Options
     , oWriteOutput :: Text -> IO ()
     , oFormat :: Format
     , oFilter :: Execution -> Bool
+    , oVersion :: Bool
     }
 
 -- | An intermediate representation, as given on the commandline
@@ -28,6 +34,7 @@ data Opts = Opts
     , optsExclude :: [Pattern]
     , optsInclude :: [Pattern]
     , optsOutput :: Maybe FilePath
+    , optsVersion :: Bool
     , optsInput :: Maybe FilePath
     }
 
@@ -43,6 +50,7 @@ parseOptions = do
         oWriteOutput = maybe T.putStrLn T.writeFile optsOutput
         oFormat = optsFormat
         oFilter ex = not (exclude ex) || include ex
+        oVersion = optsVersion
 
     return Options{..}
 
@@ -73,6 +81,7 @@ parser = Opts
         <> metavar "PATH"
         <> help "Output to PATH (defaults to stdout)"
         ))
+    <*> switch (long "version")
     <*> optional (argument str
         (  metavar "PATH"
         <> help "Read from PATH (defaults to stdin)"
@@ -86,3 +95,9 @@ parseFormat = eitherReader go
     go "rich" = Right FRichText
     go x = Left $ "Invalid format: " <> x <>
         ". Valid options are json, text, or rich."
+
+versionString :: String
+versionString = concat
+    [ "coverish v", showVersion version
+    , " (", take 7 $(gitHash), ")"
+    ]

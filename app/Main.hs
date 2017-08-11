@@ -6,6 +6,10 @@ import Coverish
 main :: IO ()
 main = do
     opts <- parseOptions
-    trace <- either error id . parseTrace (oInputName opts) <$> oReadInput opts
-    sFiles <- sourceFiles $ filterTrace (oFilter opts) trace
-    oWriteOutput opts $ format (oFormat opts) sFiles
+
+    if (oVersion opts)
+        then putStrLn versionString
+        else do
+            trace <- either error id . parseTrace (oInputName opts) <$> oReadInput opts
+            sFiles <- sourceFiles $ filterTrace (oFilter opts) trace
+            oWriteOutput opts $ format (oFormat opts) sFiles
