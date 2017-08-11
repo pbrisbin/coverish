@@ -24,10 +24,14 @@ sTotal :: Summary -> Integer
 sTotal s = sCovered s + sMissed s
 
 sPercent :: Summary -> Rational
-sPercent s = sCovered s % sTotal s
+sPercent s
+    | sTotal s == 0 = 0
+    | otherwise = sCovered s % sTotal s
 
 sStrength :: Summary -> Rational
-sStrength s = sHits s % sTotal s
+sStrength s
+    | sTotal s == 0 = 0
+    | otherwise = sHits s % sTotal s
 
 instance Monoid Summary where
     mempty = Summary 0 0 0
