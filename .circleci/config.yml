@@ -1,0 +1,18 @@
+version: 2.0
+
+jobs:
+  build:
+    docker:
+      - image: fpco/stack-build:lts-9.0
+    steps:
+      - checkout
+      - restore_cache:
+          key: stack
+      - run: stack setup
+      - run: stack build --pedantic --test --no-run-tests
+      - save_cache:
+          key: stack
+          paths:
+            - ~/.stack
+            - ./.stack-work
+      - run: stack test
