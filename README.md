@@ -49,15 +49,43 @@ Available options:
 
 ## Details
 
-*TODO*
+1. [`coverish-eval`](./app/Eval.hs) outputs a snippet of shell meant to be
+   `eval`d in your shell script. It does the following:
+
+   - Check for the presence of a `COVERISH_TRACE` variable, making this snippet
+     safe to be present always: it does nothing if this variable is not defined
+   - Redirect the output of `set -x` (execution trace) to this file
+   - Set an explicit format for the trace (via `PS4`)
+   - Enable `set -x`
+
+   The only currently-supported argument is `bash`, which outputs a
+   Bash-specific snippet. See the *Portability* section below for more details.
+
+1. `coverish` parses the trace file produced during your test suite, then
+   calculates and outputs coverage-related information in various formats.
+
+1. For convenience, [`coverish-exec`](./app/Exec.hs) handles declaring a
+   temporary file as `COVERISH_TRACE`, running your test suite, then invoking
+   `coverish` on said temporary file.
 
 ## Portability Beyond Bash
 
-*TODO*
+To use `coverish`, a shell needs to support a custom `set -x` format (i.e. `PS4`)
+which can include file and line information (e.g. `BASH_SOURCE` and `LINENO`).
+
+To use `coverish-exec`, a shell needs to support redirecting `set -x` output to
+a file (e.g. `BASH_XTRACEFD`).
+
+If not redirecting the `set -x` output, you'll have to read the trace from
+`stderr`. This may work, but if your test(s) or script(s) emit other content on
+`stderr`, it will likely cause unexpected and incorrect behavior in coverish.
 
 ## Use with Code Climate Test Reporter
 
-*TODO*
+*Coming Soon*. `coverish --format json` is meant to be easily translatable to
+the [Code Climate Test Reporter][test-reporter] format.
+
+[test-reporter]: https://github.com/codeclimate/test-reporter
 
 ## Development & Testing
 
