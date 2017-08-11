@@ -25,6 +25,8 @@ jobs:
             curl -O "https://bootstrap.pypa.io/get-pip.py"
             python get-pip.py --user
             pip install awscli --upgrade --user
+            aws --version
+            aws configure set preview.cloudfront true
       - run:
           name: Build
           command: stack build --pedantic --test --no-run-tests
@@ -53,4 +55,8 @@ jobs:
                 aws s3 cp --acl public-read "out/$exe" \
                   "s3://source.pbrisbin.com/coverish/${exe}-head-linux-x86_64"
               done
+
+              aws cloudfront create-invalidation \
+                --distribution-id E3GYLACKSHM8AF \
+                --paths "/coverish/*"
             fi
