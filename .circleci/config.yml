@@ -8,11 +8,50 @@ jobs:
       - checkout
       - restore_cache:
           key: stack
-      - run: stack setup
-      - run: stack build --pedantic --test --no-run-tests
+      - run:
+          name: Setup
+          command: |
+            stack setup
+
+            (
+              # Prevent's ld error
+              cd /usr/lib/gcc/x86_64-linux-gnu/5
+              cp crtbeginT.o crtbeginT.o.orig
+              cp crtbeginS.o crtbeginT.o
+            )
+
+            apt-get update
+            apt-get install -y python python-dev
+            curl -O "https://bootstrap.pypa.io/get-pip.py"
+            python get-pip.py --user
+            pip install awscli --upgrade --user
+      - run:
+          name: Build
+          command: stack build --pedantic --test --no-run-tests
       - save_cache:
           key: stack
           paths:
             - ~/.stack
             - ./.stack-work
-      - run: stack test
+      - run:
+          name: Test
+          command: stack test
+      - deploy:
+          name: Static binaries
+          command: |
+            set -e
+
+            # TODO remove after testing
+            CIRCLE_BRANCH=master
+
+            if [[ "$CIRCLE_BRANCH" == master ]]; then
+              mkdir -p out
+              stack clean
+              stack --local-bin-path "$PWD"/out install \
+                --ghc-options "-optl-static -fPIC -optc-Os"
+
+              for exe in coverish{,-eval,-exec}; do
+                aws s3 cp --acl public-read "out/$exe" \
+                  "s3://source.pbrisbin.com/coverish/${exe}-head-linux-x86_64"
+              done
+            fi
