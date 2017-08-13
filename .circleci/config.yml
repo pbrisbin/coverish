@@ -8,55 +8,63 @@ jobs:
       - checkout
       - restore_cache:
           key: stack
-      - run:
-          name: Setup
-          command: |
-            stack setup
-
-            (
-              # Prevent's ld error
-              cd /usr/lib/gcc/x86_64-linux-gnu/5
-              cp crtbeginT.o crtbeginT.o.orig
-              cp crtbeginS.o crtbeginT.o
-            )
-
-            apt-get update
-            apt-get install -y python python-dev
-            curl -O "https://bootstrap.pypa.io/get-pip.py"
-            python get-pip.py --user
-            pip install awscli --upgrade --user
-            aws --version
-            aws configure set preview.cloudfront true
-      - run:
-          name: Build
-          command: stack build --pedantic --test --no-run-tests
+      - run: stack build --pedantic --test --no-run-tests
       - save_cache:
           key: stack
           paths:
             - ~/.stack
             - ./.stack-work
+      - run: stack test
+
+  exes:
+    docker:
+      - image: pbrisbin/static-hs
+    steps:
+      - save_cache:
+          key: stack
+          paths:
+            - ~/.stack
+            - ./.stack-work
+      - run: mkdir -p exes
+      - run: |
+          stack \
+            --local-bin-path "$PWD"/exes install \
+            --ghc-options "-optl-static -fPIC -optc-Os"
+      - save_cache:
+          key: stack
+          paths:
+            - ~/.stack
+            - ./.stack-work
+      - persist_to_workspace:
+          paths:
+            ./exes
+
+  upload:
+    docker:
+      - image: fstab/aws-cli
+    steps:
+      - attach_workspace
       - run:
-          name: Test
-          command: stack test
-      - deploy:
-          name: Static binaries
           command: |
-            set -e
+            ls -l ./exes
+            aws --version
 
-            if [[ "$CIRCLE_BRANCH" == master ]]; then
-              mkdir -p out
-              stack clean
-              stack --local-bin-path "$PWD"/out install \
-                --ghc-options "-optl-static -fPIC -optc-Os"
+            # for exe in coverish{,-eval,-exec}; do
+            #   aws s3 cp --acl public-read "exes/$exe" \
+            #     "s3://source.pbrisbin.com/coverish/${exe}-${CIRCLE_SHA}-linux-x86_64"
+            # done
 
-              ./out/coverish --version
+            # aws configure set preview.cloudfront true
+            # aws cloudfront create-invalidation \
+            #   --distribution-id E3GYLACKSHM8AF \
+            #   --paths "/coverish/*"
 
-              for exe in coverish{,-eval,-exec}; do
-                aws s3 cp --acl public-read "out/$exe" \
-                  "s3://source.pbrisbin.com/coverish/${exe}-head-linux-x86_64"
-              done
+workflows:
+  version: 2
 
-              aws cloudfront create-invalidation \
-                --distribution-id E3GYLACKSHM8AF \
-                --paths "/coverish/*"
-            fi
+  build-exe:
+    - build
+    - exes
+    - release:
+        requires:
+          - exes
