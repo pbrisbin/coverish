@@ -53,7 +53,7 @@ jobs:
 
               for exe in coverish{,-eval,-exec}; do
                 aws s3 cp --acl public-read "out/$exe" \
-                  "s3://source.pbrisbin.com/coverish/${exe}-head-linux-x86_64"
+                  "s3://files.pbrisbin.com/src/coverish/${exe}-head-linux-x86_64"
               done
 
               aws cloudfront create-invalidation \
