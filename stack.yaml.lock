@@ -3,7 +3,21 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    hackage: dhall-1.40.2@sha256:db1d5f81912de498eeb8cf4535aebd76c695c016a8c5710970b61e83f3d345cb,34786
+    pantry-tree:
+      size: 316011
+      sha256: 4f87e4e4a327a9bffacd130a3efee3a5eb3a49d3ec85ade58eecd6c3d9608b63
+  original:
+    hackage: dhall-1.40.2@sha256:db1d5f81912de498eeb8cf4535aebd76c695c016a8c5710970b61e83f3d345cb,34786
+- completed:
+    hackage: generic-lens-2.2.0.0@sha256:4008a39f464e377130346e46062e2ac1211f9d2e256bbb1857216e889c7196be,3867
+    pantry-tree:
+      size: 2470
+      sha256: 93d7aae1de4cbbb2e3320b357cd744618cb17356989bd417d374aa73331e7370
+  original:
+    hackage: generic-lens-2.2.0.0@sha256:4008a39f464e377130346e46062e2ac1211f9d2e256bbb1857216e889c7196be,3867
 snapshots:
 - completed:
     size: 586296
