@@ -14,7 +14,7 @@ import Data.Either (rights)
 import qualified Data.Map as M
 import System.Directory
     (doesFileExist, getCurrentDirectory, withCurrentDirectory)
-import System.FilePath ((</>), splitFileName)
+import System.FilePath (splitFileName, (</>))
 
 -- | Re-structured @'Trace'@ information, to optimize our lookups
 newtype TraceLookup = TraceLookup
