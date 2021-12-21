@@ -59,7 +59,7 @@ Available options:
    - Enable `set -x`
 
    The only currently-supported argument is `bash`, which outputs a
-   Bash-specific snippet. See the *Portability* section below for more details.
+   Bash-specific snippet. See the _Portability_ section below for more details.
 
 1. `coverish` parses the trace file produced during your test suite, then
    calculates and outputs coverage-related information in various formats.
@@ -82,7 +82,7 @@ If not redirecting the `set -x` output, you'll have to read the trace from
 
 ## Use with Code Climate Test Reporter
 
-*Coming Soon*. `coverish --format json` is meant to be easily translatable to
+_Coming Soon_. `coverish --format json` is meant to be easily translatable to
 the [Code Climate Test Reporter][test-reporter] format.
 
 [test-reporter]: https://github.com/codeclimate/test-reporter
