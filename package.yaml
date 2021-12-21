@@ -1,84 +1,73 @@
 name: coverish
-version: '0.1.0.0'
-category: Network
-author: Patrick Brisbin
-maintainer: pbrisbin@gmail.com
-copyright: 2017 pbrisbin@gmail.com
-license: BSD3
+version: 0.2.0.0
+author: Patrick Brisbin <pbrisbin@gmail.com>
+license: MIT
 github: pbrisbin/coverish
+
 extra-source-files:
 - README.md
+
+dependencies:
+  - base >=4.7 && <5
+
 library:
   source-dirs: src
-  exposed-modules:
-  - Coverish
-  other-modules:
-  - Coverish.Format
-  - Coverish.Options
-  - Coverish.SourceFile
-  - Coverish.SourceFile.LineParser
-  - Coverish.Summary
-  - Coverish.Trace
-  - Coverish.Trace.Lookup
-  - Paths_coverish
   dependencies:
-  - base >=4.7 && <5
-  - Glob
-  - aeson
-  - containers
-  - directory
-  - filepath
-  - gitrev
-  - optparse-applicative
-  - parsec
-  - text
+    - Glob
+    - aeson
+    - containers
+    - directory
+    - filepath
+    - gitrev
+    - optparse-applicative
+    - parsec
+    - text
+
 executables:
   coverish:
     main: Main.hs
     source-dirs: app
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
     dependencies:
-    - base
-    - coverish
-    - text
+      - coverish
+      - text
+
   coverish-exec:
-    main: Exec.hs
-    source-dirs: app
+    main: Main.hs
+    source-dirs: coverish-exec
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
     dependencies:
-    - base
-    - containers
-    - process
-    - temporary
+      - containers
+      - process
+      - temporary
+
   coverish-eval:
-    main: Eval.hs
-    source-dirs: app
+    main: Main.hs
+    source-dirs: coverish-eval
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - base
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+
 tests:
-  coverish-test:
+  hspec:
     main: Spec.hs
     source-dirs: test
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
     dependencies:
-    - base
-    - coverish
-    - hspec
-    - QuickCheck
-    - directory
-    - filepath
-    - temporary
-    - text
+      - QuickCheck
+      - coverish
+      - directory
+      - filepath
+      - hspec
+      - temporary
+      - text

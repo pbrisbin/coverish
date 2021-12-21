@@ -49,8 +49,8 @@ Available options:
 
 ## Details
 
-1. [`coverish-eval`](./app/Eval.hs) outputs a snippet of shell meant to be
-   `eval`d in your shell script. It does the following:
+1. [`coverish-eval`](./coverish-eval/Main.hs) outputs a snippet of shell meant
+   to be `eval`d in your shell script. It does the following:
 
    - Check for the presence of a `COVERISH_TRACE` variable, making this snippet
      safe to be present always: it does nothing if this variable is not defined
@@ -64,8 +64,8 @@ Available options:
 1. `coverish` parses the trace file produced during your test suite, then
    calculates and outputs coverage-related information in various formats.
 
-1. For convenience, [`coverish-exec`](./app/Exec.hs) handles declaring a
-   temporary file as `COVERISH_TRACE`, running your test suite, then invoking
+1. For convenience, [`coverish-exec`](./coverish-exec/Main.hs) handles declaring
+   a temporary file as `COVERISH_TRACE`, running your test suite, then invoking
    `coverish` on said temporary file.
 
 ## Portability Beyond Bash

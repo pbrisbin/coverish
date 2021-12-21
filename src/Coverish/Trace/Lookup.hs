@@ -9,12 +9,8 @@ module Coverish.Trace.Lookup
 import Control.Monad ((<=<))
 import Data.Either (rights)
 import System.Directory
-    ( doesFileExist
-    , getCurrentDirectory
-    , withCurrentDirectory
-    )
-import System.FilePath ((</>), splitFileName)
-import System.IO.Error (userError)
+    (doesFileExist, getCurrentDirectory, withCurrentDirectory)
+import System.FilePath (splitFileName, (</>))
 
 import qualified Control.Exception as E
 import qualified Data.Map as M
@@ -47,7 +43,8 @@ tracePaths = M.keys . tlMap
 executedInTrace :: FilePath -> Int -> TraceLookup -> Maybe Int
 executedInTrace path line = M.lookup line <=< M.lookup path . tlMap
 
-executionToPair :: Execution -> IO (Either E.IOException (FilePath, M.Map Int Int))
+executionToPair
+    :: Execution -> IO (Either E.IOException (FilePath, M.Map Int Int))
 executionToPair ex = E.try $ do
     let (dir, name) = splitFileName $ exPath ex
 
@@ -60,6 +57,7 @@ executionToPair ex = E.try $ do
 
 executionLines :: Execution -> [(Int, Int)]
 executionLines ex =
-    let endLine = exLine ex
+    let
+        endLine = exLine ex
         beginLine = endLine - (exSize ex - 1)
     in map (, 1) [beginLine .. endLine]

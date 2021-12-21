@@ -5,8 +5,7 @@ module Coverish.Format
     , format
     ) where
 
-import Data.Aeson (ToJSON(..), (.=), encode, object)
-import Data.Monoid ((<>))
+import Data.Aeson (ToJSON(..), encode, object, (.=))
 import Data.Text (Text)
 import Data.Text.Lazy (toStrict)
 import Data.Text.Lazy.Encoding (decodeUtf8)
@@ -22,10 +21,8 @@ instance Summarized Report where
     summarize (Report sfs) = mconcat $ map sTotals sfs
 
 instance ToJSON Report where
-    toJSON r@(Report sfs) = object
-        [ "source_files" .= sfs
-        , "totals" .= summarize r
-        ]
+    toJSON r@(Report sfs) =
+        object ["source_files" .= sfs, "totals" .= summarize r]
 
 data Format
     = FJSON
@@ -34,13 +31,11 @@ data Format
 
 format :: Format -> [SourceFile] -> Text
 format FJSON sfs = toStrict $ decodeUtf8 $ encode $ toReport sfs
-format FText sfs = T.pack $ unlines
-    $ map formatFile ssfs <> ["total: " <> showPercent tsum]
+format FText sfs =
+    T.pack $ unlines $ map formatFile ssfs <> ["total: " <> showPercent tsum]
   where
-    formatFile ssf = concat
-        [ sfPath $ sSourceFile ssf, ": "
-        , showPercent $ sTotals ssf
-        ]
+    formatFile ssf =
+        concat [sfPath $ sSourceFile ssf, ": ", showPercent $ sTotals ssf]
 
     ssfs = rSourceFiles report
     tsum = summarize report
@@ -53,9 +48,9 @@ format FRichText sfs = T.unlines $ concatMap formatFile ssfs
     report = toReport sfs
 
 showSourceHeader :: SummarizedSourceFile -> [Text]
-showSourceHeader SummarizedSourceFile{..} =
+showSourceHeader SummarizedSourceFile {..} =
     [ "+-" <> T.replicate hdrWidth "-" <> "-+"
-    , "| " <> header                   <> " |"
+    , "| " <> header <> " |"
     , "+-" <> T.replicate hdrWidth "-" <> "-+"
     ]
   where
@@ -66,7 +61,7 @@ showSourceHeader SummarizedSourceFile{..} =
     perc = T.pack $ showPercent sTotals
 
 showSource :: SourceFile -> [Text]
-showSource SourceFile{..} = zipWith3 go ([1..] :: [Int]) sfLines sfCoverage
+showSource SourceFile {..} = zipWith3 go ([1 ..] :: [Int]) sfLines sfCoverage
   where
     go i ln cov = idx i <> " " <> esc (escCode cov) <> ln <> reset
 
@@ -82,7 +77,7 @@ showPercent :: Summary -> String
 showPercent = (<> "%") . show . percent . sPercent
   where
     percent :: Rational -> Double
-    percent = (*100) . fromRational
+    percent = (* 100) . fromRational
 
 esc :: Text -> Text
 esc c = "\ESC[" <> c <> "m"

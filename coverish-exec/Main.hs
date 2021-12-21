@@ -1,17 +1,11 @@
 {-# LANGUAGE RecordWildCards #-}
 module Main where
 
-import Data.List (break)
 import System.Environment (getArgs, getEnvironment)
 import System.Exit (ExitCode(..))
 import System.IO.Temp (withSystemTempFile)
 import System.Process
-    ( CreateProcess(..)
-    , callProcess
-    , createProcess
-    , proc
-    , waitForProcess
-    )
+    (CreateProcess(..), callProcess, createProcess, proc, waitForProcess)
 
 import qualified Data.Map as M
 
@@ -23,7 +17,7 @@ data Options = Options
 
 main :: IO ()
 main = do
-    Options{..} <- parseOptions
+    Options {..} <- parseOptions
 
     withSystemTempFile "" $ \f _ -> do
         callProcessWithEnv [("COVERISH_TRACE", f)] oCommand oOptions
@@ -33,18 +27,16 @@ parseOptions :: IO Options
 parseOptions = do
     args <- getArgs
 
-    let (before, after) =
-            if "--" `elem` args
-                then break (== "--") args
-                else ([], "--":args)
+    let
+        (before, after) =
+            if "--" `elem` args then break (== "--") args else ([], "--" : args)
 
     case drop 1 after of
-        (c:os) ->
-            return Options
-                { oCommand = c
-                , oOptions = os
-                , oCoverishOptions = before
-                }
+        (c : os) -> return Options
+            { oCommand = c
+            , oOptions = os
+            , oCoverishOptions = before
+            }
 
         _ -> error "usage: coverish-exec [[COVERISH OPTIONS] --] CMD [OPTIONS]"
 
