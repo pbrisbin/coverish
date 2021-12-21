@@ -1,13 +1,9 @@
 module Coverish.SummarySpec
-    ( main
-    , spec
+    ( spec
     ) where
 
-import SpecHelper
 import Data.Ratio ((%))
-
-main :: IO ()
-main = hspec spec
+import SpecHelper
 
 spec :: Spec
 spec = describe "Summary" $ do

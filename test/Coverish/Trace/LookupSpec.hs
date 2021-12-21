@@ -1,6 +1,5 @@
 module Coverish.Trace.LookupSpec
-    ( main
-    , spec
+    ( spec
     ) where
 
 import SpecHelper
@@ -8,29 +7,26 @@ import SpecHelper
 import System.Directory (getCurrentDirectory)
 import System.FilePath ((</>))
 
-main :: IO ()
-main = hspec spec
-
 spec :: Spec
 spec = do
     d <- runIO getCurrentDirectory
     tl <- runIO $ buildTraceLookup $ Trace
-            -- Use some of our own spec files, since we know they'll exist
-            [ Execution "test/Coverish/Trace/LookupSpec.hs" 1 1
-            , Execution "test/Coverish/TraceSpec.hs" 1 1
-            , Execution "/non/existent" 10 1
-            , Execution "test/Coverish/Trace/LookupSpec.hs" 2 1
-            , Execution "test/Coverish/Trace/LookupSpec.hs" 1 1
-            , Execution "test/Coverish/Trace/LookupSpec.hs" 1 1
-            , Execution "test/Coverish/Trace/LookupSpec.hs" 5 2 -- multi-line
-            ]
+        -- Use some of our own spec files, since we know they'll exist
+        [ Execution "test/Coverish/Trace/LookupSpec.hs" 1 1
+        , Execution "test/Coverish/TraceSpec.hs" 1 1
+        , Execution "/non/existent" 10 1
+        , Execution "test/Coverish/Trace/LookupSpec.hs" 2 1
+        , Execution "test/Coverish/Trace/LookupSpec.hs" 1 1
+        , Execution "test/Coverish/Trace/LookupSpec.hs" 1 1
+        , Execution "test/Coverish/Trace/LookupSpec.hs" 5 2 -- multi-line
+        ]
 
     describe "tracePaths" $ do
         it "returns sorted, canonicalized paths from the trace" $ do
-            tracePaths tl `shouldBe`
-                [ d </> "test/Coverish/Trace/LookupSpec.hs"
-                , d </> "test/Coverish/TraceSpec.hs"
-                ]
+            tracePaths tl
+                `shouldBe` [ d </> "test/Coverish/Trace/LookupSpec.hs"
+                           , d </> "test/Coverish/TraceSpec.hs"
+                           ]
 
     describe "executedInTrace" $ do
         it "returns Just the amount of times a line was executed" $ do
