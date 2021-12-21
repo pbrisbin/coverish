@@ -7,14 +7,14 @@ module Coverish.Trace.Lookup
     , executedInTrace
     ) where
 
+import qualified Control.Exception as E
 import Control.Monad ((<=<))
+import Coverish.Trace (Execution(..), Trace(..))
 import Data.Either (rights)
+import qualified Data.Map as M
 import System.Directory
     (doesFileExist, getCurrentDirectory, withCurrentDirectory)
 import System.FilePath (splitFileName, (</>))
-import qualified Control.Exception as E
-import qualified Data.Map as M
-import Coverish.Trace (Execution(..), Trace(..))
 
 -- | Re-structured @'Trace'@ information, to optimize our lookups
 newtype TraceLookup = TraceLookup
