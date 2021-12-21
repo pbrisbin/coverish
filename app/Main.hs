@@ -1,15 +1,20 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Main where
+
+module Main
+    ( main
+    ) where
 
 import Coverish
+import System.Exit (die)
 
 main :: IO ()
 main = do
     opts <- parseOptions
 
-    if (oVersion opts)
+    if oVersion opts
         then putStrLn versionString
         else do
-            trace <- either error id . parseTrace (oInputName opts) <$> oReadInput opts
+            input <- oReadInput opts
+            trace <- either die pure $ parseTrace (oInputName opts) input
             sFiles <- sourceFiles $ filterTrace (oFilter opts) trace
             oWriteOutput opts $ format (oFormat opts) sFiles

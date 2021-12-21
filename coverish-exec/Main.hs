@@ -1,19 +1,15 @@
 {-# LANGUAGE RecordWildCards #-}
-module Main where
 
-import Data.List (break)
+module Main
+    ( main
+    ) where
+
+import qualified Data.Map as M
 import System.Environment (getArgs, getEnvironment)
 import System.Exit (ExitCode(..))
 import System.IO.Temp (withSystemTempFile)
 import System.Process
-    ( CreateProcess(..)
-    , callProcess
-    , createProcess
-    , proc
-    , waitForProcess
-    )
-
-import qualified Data.Map as M
+    (CreateProcess(..), callProcess, createProcess, proc, waitForProcess)
 
 data Options = Options
     { oCommand :: FilePath
@@ -23,28 +19,26 @@ data Options = Options
 
 main :: IO ()
 main = do
-    Options{..} <- parseOptions
+    Options {..} <- parseOptions
 
     withSystemTempFile "" $ \f _ -> do
         callProcessWithEnv [("COVERISH_TRACE", f)] oCommand oOptions
-        callProcess "coverish" $ oCoverishOptions ++ [f]
+        callProcess "coverish" $ oCoverishOptions <> [f]
 
 parseOptions :: IO Options
 parseOptions = do
     args <- getArgs
 
-    let (before, after) =
-            if "--" `elem` args
-                then break (== "--") args
-                else ([], "--":args)
+    let
+        (before, after) =
+            if "--" `elem` args then break (== "--") args else ([], "--" : args)
 
     case drop 1 after of
-        (c:os) ->
-            return Options
-                { oCommand = c
-                , oOptions = os
-                , oCoverishOptions = before
-                }
+        (c : os) -> return Options
+            { oCommand = c
+            , oOptions = os
+            , oCoverishOptions = before
+            }
 
         _ -> error "usage: coverish-exec [[COVERISH OPTIONS] --] CMD [OPTIONS]"
 
@@ -62,9 +56,9 @@ callProcessWithEnv e cmd args = do
         ExitSuccess -> return ()
         ExitFailure r -> error $ unlines
             [ "process failed:"
-            , "command: " ++ cmd
-            , "arguments: " ++ show args
-            , "exit code: " ++ show r
+            , "command: " <> cmd
+            , "arguments: " <> show args
+            , "exit code: " <> show r
             ]
 
   where

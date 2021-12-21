@@ -48,12 +48,10 @@ execution = do
     void $ manyTill anyChar endOfLine
 
     -- size is 1 + any number of continuation lines
-    size <- (+1) . length . lines <$> manyTill anyToken nextExecution
+    size <- (+ 1) . length . lines <$> manyTill anyToken nextExecution
 
     return $ Execution path line size
-
-  where
-    nextExecution = lookAhead $ try prefixParser <|> eof
+    where nextExecution = lookAhead $ try prefixParser <|> eof
 
 prefixParser :: Parser ()
 prefixParser = do

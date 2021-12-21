@@ -1,25 +1,23 @@
-module Main where
+module Main
+    ( main
+    ) where
 
-import Data.Maybe (fromMaybe)
 import System.Environment (getArgs)
+import System.Exit (die)
 
 data Shell = Bash
 
 main :: IO ()
 main = do
-    shell <- fromMaybe (error usage) . parseArgs <$> getArgs
-
+    shell <- maybe (die usage) pure . parseArgs =<< getArgs
     putStrLn $ evalContent shell
 
 parseArgs :: [String] -> Maybe Shell
-parseArgs ("bash":_) = Just Bash
+parseArgs ("bash" : _) = Just Bash
 parseArgs _ = Nothing
 
 usage :: String
-usage = unlines
-    [ "usage: coverish-eval bash"
-    , "  (More shells coming soon.)"
-    ]
+usage = unlines ["usage: coverish-eval bash", "  (More shells coming soon.)"]
 
 evalContent :: Shell -> String
 evalContent Bash = unlines

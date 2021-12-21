@@ -1,21 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
+
 module Coverish.SourceFile
     ( SourceFile(..)
     , LineCoverage(..)
     , sourceFiles
     ) where
 
-import Control.Monad (forM)
-import Data.Text (Text)
-
-import qualified Data.Aeson as A
-import qualified Data.Text as T
-import qualified Data.Text.IO as T
-
 import Coverish.SourceFile.LineParser
 import Coverish.Trace
 import Coverish.Trace.Lookup
+import qualified Data.Aeson as A
+import Data.Text (Text)
+import qualified Data.Text as T
+import qualified Data.Text.IO as T
+import Data.Traversable (for)
 
 data LineCoverage
     = Null        -- ^ Not a source line
@@ -39,12 +37,14 @@ sourceFiles :: Trace -> IO [SourceFile]
 sourceFiles t = do
     tl <- buildTraceLookup t
 
-    forM (tracePaths tl) $ \path -> do
+    for (tracePaths tl) $ \path -> do
         -- N.B. tracePaths is expected to only return readable paths, so we're
         -- explicitly not handling exceptions here at this time.
         contents <- T.readFile path
 
-        let coverage = zipWith (lookupCoverage tl path) (T.lines contents) [1..]
+        let
+            coverage =
+                zipWith (lookupCoverage tl path) (T.lines contents) [1 ..]
 
         return $ SourceFile
             { sfPath = path

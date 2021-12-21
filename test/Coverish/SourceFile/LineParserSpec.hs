@@ -1,13 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 module Coverish.SourceFile.LineParserSpec
-    ( main
-    , spec
+    ( spec
     ) where
 
 import SpecHelper
-
-main :: IO ()
-main = hspec spec
 
 spec :: Spec
 spec = describe "executable" $ do

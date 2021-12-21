@@ -1,4 +1,5 @@
 {-# LANGUAGE TupleSections #-}
+
 module Coverish.Trace.Lookup
     ( TraceLookup
     , buildTraceLookup
@@ -6,20 +7,14 @@ module Coverish.Trace.Lookup
     , executedInTrace
     ) where
 
-import Control.Monad ((<=<))
-import Data.Either (rights)
-import System.Directory
-    ( doesFileExist
-    , getCurrentDirectory
-    , withCurrentDirectory
-    )
-import System.FilePath ((</>), splitFileName)
-import System.IO.Error (userError)
-
 import qualified Control.Exception as E
-import qualified Data.Map as M
-
+import Control.Monad ((<=<))
 import Coverish.Trace (Execution(..), Trace(..))
+import Data.Either (rights)
+import qualified Data.Map as M
+import System.Directory
+    (doesFileExist, getCurrentDirectory, withCurrentDirectory)
+import System.FilePath ((</>), splitFileName)
 
 -- | Re-structured @'Trace'@ information, to optimize our lookups
 newtype TraceLookup = TraceLookup
@@ -47,7 +42,8 @@ tracePaths = M.keys . tlMap
 executedInTrace :: FilePath -> Int -> TraceLookup -> Maybe Int
 executedInTrace path line = M.lookup line <=< M.lookup path . tlMap
 
-executionToPair :: Execution -> IO (Either E.IOException (FilePath, M.Map Int Int))
+executionToPair
+    :: Execution -> IO (Either E.IOException (FilePath, M.Map Int Int))
 executionToPair ex = E.try $ do
     let (dir, name) = splitFileName $ exPath ex
 
@@ -60,6 +56,7 @@ executionToPair ex = E.try $ do
 
 executionLines :: Execution -> [(Int, Int)]
 executionLines ex =
-    let endLine = exLine ex
+    let
+        endLine = exLine ex
         beginLine = endLine - (exSize ex - 1)
     in map (, 1) [beginLine .. endLine]

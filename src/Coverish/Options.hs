@@ -1,12 +1,14 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
+
 module Coverish.Options
     ( Options(..)
     , parseOptions
     , versionString
     ) where
 
-import Data.Semigroup ((<>))
+import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import Data.Version (showVersion)
 import Development.GitRev (gitHash)
@@ -40,23 +42,26 @@ data Opts = Opts
 
 parseOptions :: IO Options
 parseOptions = do
-    Opts{..} <- execParser $ info (parser <**> helper) fullDesc
+    Opts {..} <- execParser $ info (parser <**> helper) fullDesc
 
     let exclude ex = any (`match` exPath ex) optsExclude
         include ex = any (`match` exPath ex) optsInclude
 
-        oInputName = maybe "<stdin>" id optsInput
+        oInputName = fromMaybe "<stdin>" optsInput
         oReadInput = maybe T.getContents T.readFile optsInput
         oWriteOutput = maybe T.putStrLn T.writeFile optsOutput
         oFormat = optsFormat
         oFilter ex = not (exclude ex) || include ex
         oVersion = optsVersion
 
-    return Options{..}
+    return Options { .. }
+
+
+-- brittany-disable-next-binding
 
 parser :: Parser Opts
 parser = Opts
-    <$> option parseFormat
+    <$> option (eitherReader readFormat)
         (  long "format"
         <> short 'f'
         <> metavar "FORMAT"
@@ -87,17 +92,17 @@ parser = Opts
         <> help "Read from PATH (defaults to stdin)"
         ))
 
-parseFormat :: ReadM Format
-parseFormat = eitherReader go
-  where
-    go "json" = Right FJSON
-    go "text" = Right FText
-    go "rich" = Right FRichText
-    go x = Left $ "Invalid format: " <> x <>
-        ". Valid options are json, text, or rich."
+readFormat :: String -> Either String Format
+readFormat = \case
+    "json" -> Right FJSON
+    "text" -> Right FText
+    "rich" -> Right FRichText
+    x ->
+        Left
+            $ "Invalid format: "
+            <> x
+            <> ". Valid options are json, text, or rich."
 
 versionString :: String
-versionString = concat
-    [ "coverish v", showVersion version
-    , " (", take 7 $(gitHash), ")"
-    ]
+versionString =
+    concat ["coverish v", showVersion version, " (", take 7 $(gitHash), ")"]
