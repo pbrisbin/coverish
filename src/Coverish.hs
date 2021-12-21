@@ -1,4 +1,6 @@
-module Coverish (module X) where
+module Coverish
+    ( module X
+    ) where
 
 import Coverish.Format as X
 import Coverish.Options as X

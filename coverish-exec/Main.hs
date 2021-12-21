@@ -1,13 +1,15 @@
 {-# LANGUAGE RecordWildCards #-}
-module Main where
 
+module Main
+    ( main
+    ) where
+
+import qualified Data.Map as M
 import System.Environment (getArgs, getEnvironment)
 import System.Exit (ExitCode(..))
 import System.IO.Temp (withSystemTempFile)
 import System.Process
     (CreateProcess(..), callProcess, createProcess, proc, waitForProcess)
-
-import qualified Data.Map as M
 
 data Options = Options
     { oCommand :: FilePath
@@ -21,7 +23,7 @@ main = do
 
     withSystemTempFile "" $ \f _ -> do
         callProcessWithEnv [("COVERISH_TRACE", f)] oCommand oOptions
-        callProcess "coverish" $ oCoverishOptions ++ [f]
+        callProcess "coverish" $ oCoverishOptions <> [f]
 
 parseOptions :: IO Options
 parseOptions = do
@@ -54,9 +56,9 @@ callProcessWithEnv e cmd args = do
         ExitSuccess -> return ()
         ExitFailure r -> error $ unlines
             [ "process failed:"
-            , "command: " ++ cmd
-            , "arguments: " ++ show args
-            , "exit code: " ++ show r
+            , "command: " <> cmd
+            , "arguments: " <> show args
+            , "exit code: " <> show r
             ]
 
   where

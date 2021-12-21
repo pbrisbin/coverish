@@ -5,17 +5,17 @@ module Coverish.Format
     , format
     ) where
 
+import Coverish.SourceFile
+import Coverish.Summary
 import Data.Aeson (ToJSON(..), encode, object, (.=))
-import Data.Text (Text)
+import Data.Text (Text, pack)
+import qualified Data.Text as T
 import Data.Text.Lazy (toStrict)
 import Data.Text.Lazy.Encoding (decodeUtf8)
 
-import qualified Data.Text as T
-
-import Coverish.SourceFile
-import Coverish.Summary
-
-newtype Report = Report { rSourceFiles :: [SummarizedSourceFile] }
+newtype Report = Report
+    { rSourceFiles :: [SummarizedSourceFile]
+    }
 
 instance Summarized Report where
     summarize (Report sfs) = mconcat $ map sTotals sfs
@@ -32,7 +32,7 @@ data Format
 format :: Format -> [SourceFile] -> Text
 format FJSON sfs = toStrict $ decodeUtf8 $ encode $ toReport sfs
 format FText sfs =
-    T.pack $ unlines $ map formatFile ssfs <> ["total: " <> showPercent tsum]
+    pack $ unlines $ map formatFile ssfs <> ["total: " <> showPercent tsum]
   where
     formatFile ssf =
         concat [sfPath $ sSourceFile ssf, ": ", showPercent $ sTotals ssf]
@@ -57,8 +57,8 @@ showSourceHeader SummarizedSourceFile {..} =
     header = path <> " (" <> esc "36" <> perc <> reset <> ")"
     hdrWidth = T.length header - 9 -- subtract invisible escapes
 
-    path = T.pack $ sfPath sSourceFile
-    perc = T.pack $ showPercent sTotals
+    path = pack $ sfPath sSourceFile
+    perc = pack $ showPercent sTotals
 
 showSource :: SourceFile -> [Text]
 showSource SourceFile {..} = zipWith3 go ([1 ..] :: [Int]) sfLines sfCoverage
@@ -69,7 +69,7 @@ showSource SourceFile {..} = zipWith3 go ([1 ..] :: [Int]) sfLines sfCoverage
     escCode Missed = "31"
     escCode Null = "37"
 
-    idx i = T.justifyRight lnWidth ' ' $ T.pack $ show i
+    idx i = T.justifyRight lnWidth ' ' $ pack $ show i
     sfLines = T.lines sfContents
     lnWidth = length $ show $ length sfLines
 

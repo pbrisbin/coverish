@@ -50,16 +50,28 @@ comment = spaces *> char '#' *> many anyChar *> eof
 
 functionBegin :: Parser ()
 functionBegin =
-    spaces *> optional (try $ string "function") *>
-    spaces *> many1 (alphaNum <|> char '_') *>
-    spaces *> char '(' *> spaces *> char ')' *>
-    spaces *> char '{' *> spaces *> eof
+    spaces
+        *> optional (try $ string "function")
+        *> spaces
+        *> many1 (alphaNum <|> char '_')
+        *> spaces
+        *> char '('
+        *> spaces
+        *> char ')'
+        *> spaces
+        *> char '{'
+        *> spaces
+        *> eof
 
 caseBranch :: Parser ()
 caseBranch =
-    spaces *> optional (char '(') *>
-    casePattern `sepBy1` char '|' *>
-    char ')' *> spaces *> eof
+    spaces
+        *> optional (char '(')
+        *> casePattern
+        `sepBy1` char '|'
+        *> char ')'
+        *> spaces
+        *> eof
   where
     casePattern = between spaces spaces $ many1 $ satisfy $ \c ->
         c /= ')' && not (isSpace c)

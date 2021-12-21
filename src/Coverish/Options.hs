@@ -1,5 +1,7 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
+
 module Coverish.Options
     ( Options(..)
     , parseOptions
@@ -54,50 +56,48 @@ parseOptions = do
 
     return Options { .. }
 
-parser :: Parser Opts
-parser =
-    Opts
-        <$> option
-                parseFormat
-                (long "format"
-                <> short 'f'
-                <> metavar "FORMAT"
-                <> help "Output in the given FORMAT"
-                <> value FRichText
-                )
-        <*> many
-                (compile <$> strOption
-                    (long "exclude" <> short 'e' <> metavar "PATTERN" <> help
-                        "Exclude paths matching glob PATTERN"
-                    )
-                )
-        <*> many
-                (compile <$> strOption
-                    (long "include" <> short 'i' <> metavar "PATTERN" <> help
-                        "Re-include excluded paths matching glob PATTERN"
-                    )
-                )
-        <*> optional
-                (strOption
-                    (long "output" <> short 'o' <> metavar "PATH" <> help
-                        "Output to PATH (defaults to stdout)"
-                    )
-                )
-        <*> switch (long "version")
-        <*> optional
-                (argument
-                    str
-                    (metavar "PATH" <> help "Read from PATH (defaults to stdin)"
-                    )
-                )
 
-parseFormat :: ReadM Format
-parseFormat = eitherReader go
-  where
-    go "json" = Right FJSON
-    go "text" = Right FText
-    go "rich" = Right FRichText
-    go x =
+-- brittany-disable-next-binding
+
+parser :: Parser Opts
+parser = Opts
+    <$> option (eitherReader readFormat)
+        (  long "format"
+        <> short 'f'
+        <> metavar "FORMAT"
+        <> help "Output in the given FORMAT"
+        <> value FRichText
+        )
+    <*> many (compile <$> strOption
+        (  long "exclude"
+        <> short 'e'
+        <> metavar "PATTERN"
+        <> help "Exclude paths matching glob PATTERN"
+        ))
+    <*> many (compile <$> strOption
+        (  long "include"
+        <> short 'i'
+        <> metavar "PATTERN"
+        <> help "Re-include excluded paths matching glob PATTERN"
+        ))
+    <*> optional (strOption
+        (  long "output"
+        <> short 'o'
+        <> metavar "PATH"
+        <> help "Output to PATH (defaults to stdout)"
+        ))
+    <*> switch (long "version")
+    <*> optional (argument str
+        (  metavar "PATH"
+        <> help "Read from PATH (defaults to stdin)"
+        ))
+
+readFormat :: String -> Either String Format
+readFormat = \case
+    "json" -> Right FJSON
+    "text" -> Right FText
+    "rich" -> Right FRichText
+    x ->
         Left
             $ "Invalid format: "
             <> x

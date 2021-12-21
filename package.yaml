@@ -21,6 +21,7 @@ library:
     - gitrev
     - optparse-applicative
     - parsec
+    - semigroups
     - text
 
 executables:

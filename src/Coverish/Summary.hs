@@ -1,4 +1,7 @@
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE OverloadedStrings #-}
+
 module Coverish.Summary
     ( Summary(..)
     , sTotal
@@ -9,50 +12,45 @@ module Coverish.Summary
     , summarizedSourceFile
     ) where
 
+import Coverish.SourceFile
 import Data.Aeson (ToJSON(..), object, (.=))
 import Data.Ratio ((%))
-
-import Coverish.SourceFile
+import Data.Semigroup (Sum(..))
+import Data.Semigroup.Generic
+import GHC.Generics (Generic)
 
 data Summary = Summary
-    { sCovered :: Integer
-    , sMissed :: Integer
-    , sHits :: Integer
+    { sCovered :: Sum Integer
+    , sMissed :: Sum Integer
+    , sHits :: Sum Integer
     }
+    deriving stock Generic
+    deriving (Semigroup, Monoid) via GenericSemigroupMonoid Summary
 
 sTotal :: Summary -> Integer
-sTotal s = sCovered s + sMissed s
+sTotal s = getSum $ sCovered s <> sMissed s
 
 sPercent :: Summary -> Rational
 sPercent s
     | sTotal s == 0 = 0
-    | otherwise = sCovered s % sTotal s
+    | otherwise = getSum (sCovered s) % sTotal s
 
 sStrength :: Summary -> Rational
 sStrength s
     | sTotal s == 0 = 0
-    | otherwise = sHits s % sTotal s
+    | otherwise = getSum (sHits s) % sTotal s
 
-instance Semigroup Summary where
-    s1 <> s2 = Summary
-        { sCovered = sCovered s1 + sCovered s2
-        , sMissed = sMissed s1 + sMissed s2
-        , sHits = sHits s1 + sHits s2
-        }
-
-instance Monoid Summary where
-    mempty = Summary 0 0 0
+-- brittany-disable-next-binding
 
 instance ToJSON Summary where
     toJSON s = object
         [ "percent" .= sPercent s
         , "strength" .= sStrength s
-        , "lines"
-            .= object
-                   [ "covered" .= sCovered s
-                   , "missed" .= sMissed s
-                   , "total" .= sTotal s
-                   ]
+        , "lines" .= object
+           [ "covered" .= getSum (sCovered s)
+           , "missed" .= getSum (sMissed s)
+           , "total" .= sTotal s
+           ]
         ]
 
 class Summarized a where

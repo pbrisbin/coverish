@@ -1,4 +1,5 @@
 {-# LANGUAGE TupleSections #-}
+
 module Coverish.Trace.Lookup
     ( TraceLookup
     , buildTraceLookup
@@ -11,10 +12,8 @@ import Data.Either (rights)
 import System.Directory
     (doesFileExist, getCurrentDirectory, withCurrentDirectory)
 import System.FilePath (splitFileName, (</>))
-
 import qualified Control.Exception as E
 import qualified Data.Map as M
-
 import Coverish.Trace (Execution(..), Trace(..))
 
 -- | Re-structured @'Trace'@ information, to optimize our lookups
