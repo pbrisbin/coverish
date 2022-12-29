@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Coverish.Options
@@ -8,18 +6,18 @@ module Coverish.Options
     , versionString
     ) where
 
+import Prelude
+
+import Coverish.Format (Format(..))
+import Coverish.Trace (Execution(..))
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
+import qualified Data.Text.IO as T
 import Data.Version (showVersion)
 import Development.GitRev (gitHash)
 import Options.Applicative
 import Paths_coverish (version)
 import System.FilePath.Glob (Pattern, compile, match)
-
-import qualified Data.Text.IO as T
-
-import Coverish.Format (Format(..))
-import Coverish.Trace (Execution(..))
 
 data Options = Options
     { oInputName :: String

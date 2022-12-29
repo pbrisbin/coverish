@@ -1,8 +1,9 @@
-{-# LANGUAGE OverloadedStrings #-}
 module Coverish.SourceFile.LineParser
     ( executable
     , parseUnexecutable
     ) where
+
+import Prelude
 
 import Data.Bifunctor (first)
 import Data.Char (isSpace)

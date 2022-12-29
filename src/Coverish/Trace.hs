@@ -5,6 +5,8 @@ module Coverish.Trace
     , filterTrace
     ) where
 
+import Prelude
+
 import Control.Monad (void)
 import Data.Bifunctor (bimap)
 import Data.Text (Text)
@@ -16,9 +18,10 @@ data Execution = Execution
     , exLine :: Int
     , exSize :: Int
     }
-    deriving (Eq, Show)
+    deriving stock (Eq, Show)
 
-newtype Trace = Trace [Execution] deriving (Eq, Show)
+newtype Trace = Trace [Execution]
+    deriving stock (Eq, Show)
 
 -- | Parse the output of @set -x@ faithfully
 --

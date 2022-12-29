@@ -4,13 +4,15 @@ module SpecHelper
     , module X
     ) where
 
+import Prelude as X
+
 import Coverish as X
 import Data.Text as X (Text)
 import Test.Hspec as X
 
 import Control.Monad (forM_)
 import System.Directory (createDirectoryIfMissing)
-import System.FilePath ((</>), takeDirectory)
+import System.FilePath (takeDirectory, (</>))
 import System.IO.Temp (withSystemTempDirectory)
 
 import qualified Data.Text as T

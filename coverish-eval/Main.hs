@@ -2,6 +2,8 @@ module Main
     ( main
     ) where
 
+import Prelude
+
 import System.Environment (getArgs)
 import System.Exit (die)
 

@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Coverish.SourceFile.LineParserSpec
     ( spec
     ) where

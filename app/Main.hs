@@ -1,8 +1,8 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Main
     ( main
     ) where
+
+import Prelude
 
 import Coverish
 import System.Exit (die)

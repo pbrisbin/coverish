@@ -1,8 +1,8 @@
-{-# LANGUAGE RecordWildCards #-}
-
 module Main
     ( main
     ) where
+
+import Prelude
 
 import qualified Data.Map as M
 import System.Environment (getArgs, getEnvironment)

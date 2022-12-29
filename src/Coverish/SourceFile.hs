@@ -1,10 +1,10 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Coverish.SourceFile
     ( SourceFile(..)
     , LineCoverage(..)
     , sourceFiles
     ) where
+
+import Prelude
 
 import Coverish.SourceFile.LineParser
 import Coverish.Trace
@@ -19,7 +19,7 @@ data LineCoverage
     = Null        -- ^ Not a source line
     | Missed      -- ^ Uncovered source line
     | Covered Int -- ^ Covered some amount of times
-    deriving (Eq, Show)
+    deriving stock (Eq, Show)
 
 instance A.ToJSON LineCoverage where
     toJSON Null = A.Null
@@ -31,7 +31,7 @@ data SourceFile = SourceFile
     , sfContents :: Text
     , sfCoverage :: [LineCoverage]
     }
-    deriving (Eq, Show)
+    deriving stock (Eq, Show)
 
 sourceFiles :: Trace -> IO [SourceFile]
 sourceFiles t = do

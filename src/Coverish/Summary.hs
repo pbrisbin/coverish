@@ -1,6 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingVia #-}
-{-# LANGUAGE OverloadedStrings #-}
 
 module Coverish.Summary
     ( Summary(..)
@@ -12,8 +11,10 @@ module Coverish.Summary
     , summarizedSourceFile
     ) where
 
+import Prelude
+
 import Coverish.SourceFile
-import Data.Aeson ((.=), ToJSON(..), object)
+import Data.Aeson (ToJSON(..), object, (.=))
 import Data.Ratio ((%))
 import Data.Semigroup (Sum(..))
 import Data.Semigroup.Generic

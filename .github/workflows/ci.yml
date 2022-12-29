@@ -9,22 +9,21 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: freckle/stack-cache-action@v1
-      - uses: freckle/stack-action@v3
-      - uses: freckle/weeder-action@v1
+      - uses: actions/checkout@v3
+      - uses: freckle/stack-cache-action@v2
+      - id: stack
+        uses: freckle/stack-action@v3
+      - uses: freckle/weeder-action@v2
         with:
-          weeder-version: 2.2.0
+          ghc-version: ${{ steps.stack.outputs.compiler-version }}
 
   hlint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: rwe/actions-hlint-setup@v1
+      - uses: haskell/actions/hlint-setup@v2
       - run: |
           curl -o .hlint.yaml https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml
-      - uses: rwe/actions-hlint-run@v2
+      - uses: haskell/actions/hlint-run@v2
         with:
           fail-on: warning
-
-  # TODO binaries
