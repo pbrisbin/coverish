@@ -7,7 +7,7 @@ import Prelude
 
 import Coverish.SourceFile
 import Coverish.Summary
-import Data.Aeson (ToJSON(..), encode, object, (.=))
+import Data.Aeson ((.=), ToJSON(..), encode, object)
 import Data.Text (Text, pack)
 import qualified Data.Text as T
 import Data.Text.Lazy (toStrict)

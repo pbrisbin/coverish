@@ -14,7 +14,7 @@ module Coverish.Summary
 import Prelude
 
 import Coverish.SourceFile
-import Data.Aeson (ToJSON(..), object, (.=))
+import Data.Aeson ((.=), ToJSON(..), object)
 import Data.Ratio ((%))
 import Data.Semigroup (Sum(..))
 import Data.Semigroup.Generic
